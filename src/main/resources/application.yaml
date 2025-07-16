@@ -1,4 +1,17 @@
 spring:
+  application:
+    name: user-service
+
+  cloud:
+    eureka:
+      client:
+        service-url:
+          defaultZone: http://eureka-server:8761/eureka
+        register-with-eureka: true
+        fetch-registry: true
+      instance:
+        prefer-ip-address: true
+
   datasource:
     url: jdbc:mysql://localhost:3307/user_db
     username: root
@@ -10,16 +23,6 @@ spring:
       ddl-auto: update
     show-sql: true
     database-platform: org.hibernate.dialect.MySQL8Dialect
-
-  cloud:
-    eureka:
-      client:
-        service-url:
-          defaultZone: http://eureka-server:8761/eureka
-        register-with-eureka: true
-        fetch-registry: true
-      instance:
-        prefer-ip-address: true
 
 server:
   port: 8083
