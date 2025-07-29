@@ -51,10 +51,9 @@ public class UserServiceImpl implements UserService {
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("User not found"));
 
-        updateUserRequestMapper.updateEntityFromDto(dto, user);
+        user.setUsername(dto.getUsername());
 
         User updatedUser = userRepository.save(user);
-
         return userResponseMapper.toDto(updatedUser);
     }
 

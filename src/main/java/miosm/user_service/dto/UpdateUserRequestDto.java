@@ -11,5 +11,4 @@ import lombok.Setter;
 @AllArgsConstructor
 public class UpdateUserRequestDto {
     private String username;
-    private String bio;
 }
