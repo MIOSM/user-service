@@ -24,6 +24,12 @@ public class UserController {
         return ResponseEntity.ok(user);
     }
 
+    @GetMapping("/profile")
+    public ResponseEntity<UserResponseDto> getUserProfile(@RequestParam String username) {
+        UserResponseDto user = userService.findUserByUsername(username);
+        return ResponseEntity.ok(user);
+    }
+
     @PostMapping
     public ResponseEntity<UserResponseDto> createUser(@RequestBody CreateUserRequestDto dto) {
         UserResponseDto createdUser = userService.createUser(dto);
@@ -33,6 +39,12 @@ public class UserController {
     @PatchMapping("/{id}")
     public ResponseEntity<UserResponseDto> updateUser(@PathVariable UUID id, @RequestBody UpdateUserRequestDto dto) {
         UserResponseDto updatedUser = userService.updateUser(id, dto);
+        return ResponseEntity.ok(updatedUser);
+    }
+
+    @PatchMapping("/update")
+    public ResponseEntity<UserResponseDto> updateUserByUsername(@RequestParam String username, @RequestBody UpdateUserRequestDto dto) {
+        UserResponseDto updatedUser = userService.updateUserByUsername(username, dto);
         return ResponseEntity.ok(updatedUser);
     }
 

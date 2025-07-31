@@ -27,6 +27,12 @@ public class User {
     @Column(nullable = false, unique = true, length = 32)
     private String username;
 
+    @Column(nullable = false, length = 50)
+    private String firstName;
+
+    @Column(nullable = false, length = 50)
+    private String lastName;
+
     @Column(columnDefinition = "TEXT")
     private String bio;
 

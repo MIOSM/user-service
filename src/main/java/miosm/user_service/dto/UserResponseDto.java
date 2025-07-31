@@ -15,6 +15,8 @@ import java.util.UUID;
 public class UserResponseDto {
     private UUID id;
     private String username;
+    private String firstName;
+    private String lastName;
     private String bio;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;

@@ -41,6 +41,14 @@ public class UserServiceImpl implements UserService {
             user.setUsername(dto.getUsername());
         }
         
+        if (user.getFirstName() == null) {
+            user.setFirstName(dto.getFirstName());
+        }
+        
+        if (user.getLastName() == null) {
+            user.setLastName(dto.getLastName());
+        }
+        
         user.setId(dto.getId());
         User savedUser = userRepository.save(user);
         return userResponseMapper.toDto(savedUser);
@@ -54,6 +62,18 @@ public class UserServiceImpl implements UserService {
         user.setUsername(dto.getUsername());
 
         User updatedUser = userRepository.save(user);
+        return userResponseMapper.toDto(updatedUser);
+    }
+
+    @Override
+    public UserResponseDto updateUserByUsername(String username, UpdateUserRequestDto dto) {
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new IllegalArgumentException("User not found: " + username));
+
+        updateUserRequestMapper.updateEntityFromDto(dto, user);
+
+        User updatedUser = userRepository.save(user);
+
         return userResponseMapper.toDto(updatedUser);
     }
 

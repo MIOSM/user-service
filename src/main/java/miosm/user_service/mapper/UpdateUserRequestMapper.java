@@ -12,7 +12,9 @@ import org.mapstruct.NullValuePropertyMappingStrategy;
 public interface UpdateUserRequestMapper {
 
     @Mapping(target = "username", source = "username")
-    @Mapping(target = "bio", ignore = true)
+    @Mapping(target = "firstName", source = "firstName")
+    @Mapping(target = "lastName", source = "lastName")
+    @Mapping(target = "bio", source = "bio")
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "createdAt", ignore = true)
     @Mapping(target = "updatedAt", ignore = true)

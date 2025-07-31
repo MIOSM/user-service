@@ -14,5 +14,7 @@ import java.util.UUID;
 public class CreateUserRequestDto {
     private UUID id;
     private String username;
+    private String firstName;
+    private String lastName;
     private String bio;
 }
