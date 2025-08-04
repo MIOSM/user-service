@@ -27,14 +27,14 @@ public class User {
     @Column(nullable = false, unique = true, length = 32)
     private String username;
 
-    @Column(nullable = false, length = 50)
-    private String firstName;
-
-    @Column(nullable = false, length = 50)
-    private String lastName;
-
     @Column(columnDefinition = "TEXT")
     private String bio;
+
+    @Column(length = 500)
+    private String avatarUrl;
+
+    @Column(length = 500)
+    private String coverImageUrl;
 
     @CreationTimestamp
     @Column(nullable = false, updatable = false)
