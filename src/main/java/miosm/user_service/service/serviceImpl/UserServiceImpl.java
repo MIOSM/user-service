@@ -37,6 +37,13 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    public UserResponseDto findUserById(UUID id) {
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("User not found: " + id));
+        return userResponseMapper.toDto(user);
+    }
+
+    @Override
     public UserResponseDto createUser(CreateUserRequestDto dto) {
         userRepository.findByUsername(dto.getUsername())
                 .ifPresent(u -> { throw new IllegalArgumentException("User already exists: " + dto.getUsername()); });

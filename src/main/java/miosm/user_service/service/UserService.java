@@ -13,6 +13,8 @@ public interface UserService {
 
     UserResponseDto findUserByUsername(String username);
 
+    UserResponseDto findUserById(UUID id);
+
     UserResponseDto createUser(CreateUserRequestDto dto);
 
     UserResponseDto updateUser(UUID id, UpdateUserRequestDto dto);
