@@ -11,9 +11,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
-import org.springframework.web.multipart.MultipartHttpServletRequest;
 
-import jakarta.servlet.http.HttpServletRequest;
+
 import java.util.Map;
 import java.util.UUID;
 
@@ -51,50 +50,44 @@ public class UserController {
     }
 
     @PostMapping("/{id}/avatar")
-    public ResponseEntity<UserResponseDto> uploadAvatar(@PathVariable UUID id, HttpServletRequest request) {
+    public ResponseEntity<Map<String, Object>> uploadAvatar(@PathVariable UUID id, @RequestPart("file") MultipartFile file) {
         try {
-            if (request instanceof MultipartHttpServletRequest) {
-                MultipartHttpServletRequest multipartRequest = (MultipartHttpServletRequest) request;
-                
-                for (String partName : multipartRequest.getMultiFileMap().keySet()) {
-                    for (MultipartFile file : multipartRequest.getMultiFileMap().get(partName)) {
-                        if (file.getOriginalFilename() != null && !file.isEmpty()) {
-                            UserResponseDto updatedUser = userService.uploadAvatar(id, file);
-                            return ResponseEntity.ok(updatedUser);
-                        }
-                    }
-                }
-                
-                return ResponseEntity.badRequest().build();
-            } else {
-                return ResponseEntity.badRequest().build();
+            if (file == null || file.isEmpty()) {
+                return ResponseEntity.badRequest().body(Map.of("success", false, "message", "No file provided"));
             }
+            
+            UserResponseDto updatedUser = userService.uploadAvatar(id, file);
+            return ResponseEntity.ok(Map.of(
+                "success", true,
+                "message", "Avatar uploaded successfully",
+                "avatarUrl", updatedUser.getAvatarUrl(),
+                "user", updatedUser
+            ));
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+            log.error("Error uploading avatar for user {}: {}", id, e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(Map.of("success", false, "message", "Failed to upload avatar: " + e.getMessage()));
         }
     }
 
     @PostMapping("/{id}/coverImage")
-    public ResponseEntity<UserResponseDto> uploadCoverImage(@PathVariable UUID id, HttpServletRequest request) {
+    public ResponseEntity<Map<String, Object>> uploadCoverImage(@PathVariable UUID id, @RequestPart("file") MultipartFile file) {
         try {
-            if (request instanceof MultipartHttpServletRequest) {
-                MultipartHttpServletRequest multipartRequest = (MultipartHttpServletRequest) request;
-                
-                for (String partName : multipartRequest.getMultiFileMap().keySet()) {
-                    for (MultipartFile file : multipartRequest.getMultiFileMap().get(partName)) {
-                        if (file.getOriginalFilename() != null && !file.isEmpty()) {
-                            UserResponseDto updatedUser = userService.uploadCoverImage(id, file);
-                            return ResponseEntity.ok(updatedUser);
-                        }
-                    }
-                }
-                
-                return ResponseEntity.badRequest().build();
-            } else {
-                return ResponseEntity.badRequest().build();
+            if (file == null || file.isEmpty()) {
+                return ResponseEntity.badRequest().body(Map.of("success", false, "message", "No file provided"));
             }
+            
+            UserResponseDto updatedUser = userService.uploadCoverImage(id, file);
+            return ResponseEntity.ok(Map.of(
+                "success", true,
+                "message", "Cover image uploaded successfully",
+                "coverImageUrl", updatedUser.getCoverImageUrl(),
+                "user", updatedUser
+            ));
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+            log.error("Error uploading cover image for user {}: {}", id, e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(Map.of("success", false, "message", "Failed to upload cover image: " + e.getMessage()));
         }
     }
 
