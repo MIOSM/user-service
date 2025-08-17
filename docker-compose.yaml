@@ -22,7 +22,7 @@ services:
       MINIO_ROOT_USER: minioadmin
       MINIO_ROOT_PASSWORD: minioadmin
       MINIO_BROWSER_REDIRECT_URL: http://localhost:9001
-      MINIO_API_CORS_ALLOW_ORIGIN: "http://localhost:4200"
+      MINIO_API_CORS_ALLOW_ORIGIN: "http://localhost:4200,http://localhost:8083"
     command: server /data --console-address ":9001"
     volumes:
       - minio_data:/data

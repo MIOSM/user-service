@@ -49,7 +49,7 @@ public class MinioService {
         boolean bucketExists = minioClient.bucketExists(BucketExistsArgs.builder().bucket(bucket).build());
         if (!bucketExists) {
             minioClient.makeBucket(MakeBucketArgs.builder().bucket(bucket).build());
-            
+
             String policy = """
                 {
                     "Version": "2012-10-17",
