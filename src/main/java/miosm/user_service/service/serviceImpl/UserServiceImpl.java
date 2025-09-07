@@ -15,8 +15,10 @@ import miosm.user_service.service.UserService;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -197,5 +199,29 @@ public class UserServiceImpl implements UserService {
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("User not found: " + id));
         userRepository.delete(user);
+    }
+
+    @Override
+    public List<UserResponseDto> searchUsers(String query) {
+        try {
+            log.info("Searching users with query: {}", query);
+            
+            if (query == null || query.trim().isEmpty()) {
+                log.warn("Empty search query provided");
+                return List.of();
+            }
+            
+            String trimmedQuery = query.trim();
+            List<User> users = userRepository.searchUsersRanked(trimmedQuery);
+            
+            log.info("Found {} users matching query: {}", users.size(), trimmedQuery);
+            
+            return users.stream()
+                    .map(userResponseMapper::toDto)
+                    .collect(Collectors.toList());
+        } catch (Exception e) {
+            log.error("Error searching users with query '{}': {}", query, e.getMessage(), e);
+            throw new RuntimeException("Failed to search users: " + e.getMessage(), e);
+        }
     }
 }

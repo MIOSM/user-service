@@ -6,6 +6,7 @@ import miosm.user_service.dto.UserResponseDto;
 import miosm.user_service.entity.User;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -28,4 +29,6 @@ public interface UserService {
     UserResponseDto deleteCoverImage(UUID id);
 
     void deleteUser(UUID id);
+    
+    List<UserResponseDto> searchUsers(String query);
 }
