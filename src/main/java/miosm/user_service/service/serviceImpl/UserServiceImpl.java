@@ -10,6 +10,8 @@ import miosm.user_service.mapper.CreateUserRequestMapper;
 import miosm.user_service.mapper.UpdateUserRequestMapper;
 import miosm.user_service.mapper.UserResponseMapper;
 import miosm.user_service.repository.UserRepository;
+import miosm.user_service.repository.SubscriptionRepository;
+import miosm.user_service.entity.Subscription;
 import miosm.user_service.service.MinioService;
 import miosm.user_service.service.UserService;
 import org.springframework.stereotype.Service;
@@ -26,6 +28,7 @@ import java.util.stream.Collectors;
 public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
+    private final SubscriptionRepository subscriptionRepository;
     private final CreateUserRequestMapper createUserRequestMapper;
     private final UpdateUserRequestMapper updateUserRequestMapper;
     private final UserResponseMapper userResponseMapper;
@@ -222,6 +225,131 @@ public class UserServiceImpl implements UserService {
         } catch (Exception e) {
             log.error("Error searching users with query '{}': {}", query, e.getMessage(), e);
             throw new RuntimeException("Failed to search users: " + e.getMessage(), e);
+        }
+    }
+
+    @Override
+    public void followUser(UUID followerId, UUID followingId) {
+        try {
+            log.info("User {} attempting to follow user {}", followerId, followingId);
+            
+            if (followerId.equals(followingId)) {
+                throw new IllegalArgumentException("User cannot follow themselves");
+            }
+            
+            User follower = userRepository.findById(followerId)
+                    .orElseThrow(() -> new IllegalArgumentException("Follower not found: " + followerId));
+            
+            User following = userRepository.findById(followingId)
+                    .orElseThrow(() -> new IllegalArgumentException("User to follow not found: " + followingId));
+            
+            if (subscriptionRepository.existsByFollowerAndFollowing(follower, following)) {
+                log.warn("User {} is already following user {}", followerId, followingId);
+                return;
+            }
+            
+            Subscription subscription = new Subscription();
+            subscription.setFollower(follower);
+            subscription.setFollowing(following);
+            
+            subscriptionRepository.save(subscription);
+            log.info("User {} successfully followed user {}", followerId, followingId);
+        } catch (Exception e) {
+            log.error("Failed to follow user {}: {}", followingId, e.getMessage(), e);
+            throw new RuntimeException("Failed to follow user: " + e.getMessage(), e);
+        }
+    }
+
+    @Override
+    public void unfollowUser(UUID followerId, UUID followingId) {
+        try {
+            log.info("User {} attempting to unfollow user {}", followerId, followingId);
+            
+            User follower = userRepository.findById(followerId)
+                    .orElseThrow(() -> new IllegalArgumentException("Follower not found: " + followerId));
+            
+            User following = userRepository.findById(followingId)
+                    .orElseThrow(() -> new IllegalArgumentException("User to unfollow not found: " + followingId));
+            
+            Optional<Subscription> subscription = subscriptionRepository.findByFollowerAndFollowing(follower, following);
+            
+            if (subscription.isPresent()) {
+                subscriptionRepository.delete(subscription.get());
+                log.info("User {} successfully unfollowed user {}", followerId, followingId);
+            } else {
+                log.warn("User {} was not following user {}", followerId, followingId);
+            }
+        } catch (Exception e) {
+            log.error("Failed to unfollow user {}: {}", followingId, e.getMessage(), e);
+            throw new RuntimeException("Failed to unfollow user: " + e.getMessage(), e);
+        }
+    }
+
+    @Override
+    public boolean isFollowing(UUID followerId, UUID followingId) {
+        try {
+            User follower = userRepository.findById(followerId)
+                    .orElseThrow(() -> new IllegalArgumentException("Follower not found: " + followerId));
+            
+            User following = userRepository.findById(followingId)
+                    .orElseThrow(() -> new IllegalArgumentException("User not found: " + followingId));
+            
+            return subscriptionRepository.existsByFollowerAndFollowing(follower, following);
+        } catch (Exception e) {
+            log.error("Failed to check if user {} is following user {}: {}", followerId, followingId, e.getMessage(), e);
+            return false;
+        }
+    }
+
+    @Override
+    public List<UserResponseDto> getFollowers(UUID userId) {
+        try {
+            log.info("Getting followers for user: {}", userId);
+            
+            List<User> followers = subscriptionRepository.findFollowersByUserId(userId);
+            
+            return followers.stream()
+                    .map(userResponseMapper::toDto)
+                    .collect(Collectors.toList());
+        } catch (Exception e) {
+            log.error("Failed to get followers for user {}: {}", userId, e.getMessage(), e);
+            throw new RuntimeException("Failed to get followers: " + e.getMessage(), e);
+        }
+    }
+
+    @Override
+    public List<UserResponseDto> getFollowing(UUID userId) {
+        try {
+            log.info("Getting following list for user: {}", userId);
+            
+            List<User> following = subscriptionRepository.findFollowingByUserId(userId);
+            
+            return following.stream()
+                    .map(userResponseMapper::toDto)
+                    .collect(Collectors.toList());
+        } catch (Exception e) {
+            log.error("Failed to get following list for user {}: {}", userId, e.getMessage(), e);
+            throw new RuntimeException("Failed to get following list: " + e.getMessage(), e);
+        }
+    }
+
+    @Override
+    public Long getFollowersCount(UUID userId) {
+        try {
+            return subscriptionRepository.countFollowersByUserId(userId);
+        } catch (Exception e) {
+            log.error("Failed to get followers count for user {}: {}", userId, e.getMessage(), e);
+            return 0L;
+        }
+    }
+
+    @Override
+    public Long getFollowingCount(UUID userId) {
+        try {
+            return subscriptionRepository.countFollowingByUserId(userId);
+        } catch (Exception e) {
+            log.error("Failed to get following count for user {}: {}", userId, e.getMessage(), e);
+            return 0L;
         }
     }
 }

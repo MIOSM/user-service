@@ -134,4 +134,93 @@ public class UserController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
+
+    // Subscription endpoints
+    @PostMapping("/{followerId}/follow/{followingId}")
+    public ResponseEntity<Map<String, Object>> followUser(@PathVariable UUID followerId, @PathVariable UUID followingId) {
+        try {
+            userService.followUser(followerId, followingId);
+            return ResponseEntity.ok(Map.of(
+                "success", true,
+                "message", "User followed successfully"
+            ));
+        } catch (Exception e) {
+            log.error("Error following user {}: {}", followingId, e.getMessage());
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body(Map.of("success", false, "message", e.getMessage()));
+        }
+    }
+
+    @DeleteMapping("/{followerId}/follow/{followingId}")
+    public ResponseEntity<Map<String, Object>> unfollowUser(@PathVariable UUID followerId, @PathVariable UUID followingId) {
+        try {
+            userService.unfollowUser(followerId, followingId);
+            return ResponseEntity.ok(Map.of(
+                "success", true,
+                "message", "User unfollowed successfully"
+            ));
+        } catch (Exception e) {
+            log.error("Error unfollowing user {}: {}", followingId, e.getMessage());
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body(Map.of("success", false, "message", e.getMessage()));
+        }
+    }
+
+    @GetMapping("/{followerId}/following/{followingId}")
+    public ResponseEntity<Map<String, Object>> isFollowing(@PathVariable UUID followerId, @PathVariable UUID followingId) {
+        try {
+            boolean isFollowing = userService.isFollowing(followerId, followingId);
+            return ResponseEntity.ok(Map.of(
+                "isFollowing", isFollowing
+            ));
+        } catch (Exception e) {
+            log.error("Error checking if user {} is following user {}: {}", followerId, followingId, e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(Map.of("isFollowing", false));
+        }
+    }
+
+    @GetMapping("/{userId}/followers")
+    public ResponseEntity<List<UserResponseDto>> getFollowers(@PathVariable UUID userId) {
+        try {
+            List<UserResponseDto> followers = userService.getFollowers(userId);
+            return ResponseEntity.ok(followers);
+        } catch (Exception e) {
+            log.error("Error getting followers for user {}: {}", userId, e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+    }
+
+    @GetMapping("/{userId}/following")
+    public ResponseEntity<List<UserResponseDto>> getFollowing(@PathVariable UUID userId) {
+        try {
+            List<UserResponseDto> following = userService.getFollowing(userId);
+            return ResponseEntity.ok(following);
+        } catch (Exception e) {
+            log.error("Error getting following list for user {}: {}", userId, e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+    }
+
+    @GetMapping("/{userId}/followers/count")
+    public ResponseEntity<Map<String, Long>> getFollowersCount(@PathVariable UUID userId) {
+        try {
+            Long count = userService.getFollowersCount(userId);
+            return ResponseEntity.ok(Map.of("count", count));
+        } catch (Exception e) {
+            log.error("Error getting followers count for user {}: {}", userId, e.getMessage());
+            return ResponseEntity.ok(Map.of("count", 0L));
+        }
+    }
+
+    @GetMapping("/{userId}/following/count")
+    public ResponseEntity<Map<String, Long>> getFollowingCount(@PathVariable UUID userId) {
+        try {
+            Long count = userService.getFollowingCount(userId);
+            return ResponseEntity.ok(Map.of("count", count));
+        } catch (Exception e) {
+            log.error("Error getting following count for user {}: {}", userId, e.getMessage());
+            return ResponseEntity.ok(Map.of("count", 0L));
+        }
+    }
 }

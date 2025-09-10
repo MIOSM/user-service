@@ -31,4 +31,18 @@ public interface UserService {
     void deleteUser(UUID id);
     
     List<UserResponseDto> searchUsers(String query);
+
+    void followUser(UUID followerId, UUID followingId);
+    
+    void unfollowUser(UUID followerId, UUID followingId);
+    
+    boolean isFollowing(UUID followerId, UUID followingId);
+    
+    List<UserResponseDto> getFollowers(UUID userId);
+    
+    List<UserResponseDto> getFollowing(UUID userId);
+    
+    Long getFollowersCount(UUID userId);
+    
+    Long getFollowingCount(UUID userId);
 }
