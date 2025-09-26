@@ -135,7 +135,6 @@ public class UserController {
         }
     }
 
-    // Subscription endpoints
     @PostMapping("/{followerId}/follow/{followingId}")
     public ResponseEntity<Map<String, Object>> followUser(@PathVariable UUID followerId, @PathVariable UUID followingId) {
         try {
